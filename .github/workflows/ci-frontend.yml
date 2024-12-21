@@ -41,8 +41,14 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.IMAGE_NAME }}
-          format: 'table'
-          output: '${{ env.IMAGE_NAME }}-scan-report.txt'
+          format: 'sarif'
+          output: '${{ env.IMAGE_NAME }}-scan-report.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
 
       - name: Upload Scan Results
         uses: actions/upload-artifact@v3
