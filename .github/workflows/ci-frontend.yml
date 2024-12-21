@@ -26,6 +26,7 @@ jobs:
       - name: Set environment variables
         run: |
           COMMIT_SHA=$(git rev-parse --short HEAD)
+          echo "APP_NAME=cymbal-frontend" >> $GITHUB_ENV
           echo "IMAGE_NAME=${{ env.DOCKERHUB_ID }}/cymbal-frontend" >> $GITHUB_ENV
           echo "IMAGE_TAG_1=latest" >> $GITHUB_ENV
           echo "IMAGE_TAG_2=${{ github.run_number }}-$COMMIT_SHA" >> $GITHUB_ENV
@@ -42,13 +43,12 @@ jobs:
         with:
           image-ref: ${{ env.IMAGE_NAME }}
           format: 'sarif'
-          output: '${{ env.IMAGE_NAME }}-scan-report.sarif'
+          output: '${{ env.APP_NAME }}.sarif'
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        if: always()
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: '${{ env.APP_NAME }}.sarif'
 
       - name: Upload Scan Results
         uses: actions/upload-artifact@v3
