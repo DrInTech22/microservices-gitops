@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'src/frontend/**'
+      - 'src/adservice/**'
   workflow_dispatch:
 
 permissions:
@@ -24,13 +24,13 @@ jobs:
       - name: Set environment variables
         run: |
           COMMIT_SHA=$(git rev-parse --short HEAD)
-          echo "APP_NAME=cymbal-frontend" >> $GITHUB_ENV
+          echo "APP_NAME=adservice" >> $GITHUB_ENV
           echo "IMAGE_NAME=${{ env.DOCKERHUB_ID }}/${{ env.APP_NAME }}" >> $GITHUB_ENV
           echo "IMAGE_TAG_1=latest" >> $GITHUB_ENV
           echo "IMAGE_TAG_2=${{ github.run_number }}-$COMMIT_SHA" >> $GITHUB_ENV
 
       - name: Build Docker Image
-        working-directory: src/frontend
+        working-directory: src/adservice
         run: |
           docker build -t ${{ env.IMAGE_NAME }} .
           docker tag ${{ env.IMAGE_NAME }} ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_2 }}
