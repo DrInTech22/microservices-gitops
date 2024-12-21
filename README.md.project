@@ -1,0 +1,19 @@
+# Online Boutique: Cloud-Native Microservices Platform
+
+## Overview
+Online Boutique is a cloud-native microservices demo application that simulates an e-commerce platform. This repository demonstrates a production-grade deployment using modern DevOps practices and tools. The architecture consists of multiple microservices communicating with each other to provide a complete e-commerce experience.
+
+## Architecture
+
+### Microservices Components
+- **Frontend Service** (Go) - Web interface for users
+- **Cart Service** (C#) - Shopping cart data management
+- **Product Catalog Service** (Go) - Product information management
+- **Currency Service** (Node.js) - Currency conversion
+- **Payment Service** (Node.js) - Payment processing
+- **Shipping Service** (Go) - Shipping cost calculation
+- **Email Service** (Python) - Order confirmation emails
+- **Checkout Service** (Go) - Order processing
+- **Recommendation Service** (Python) - Product recommendations
+- **Ad Service** (Java) - Targeted advertisements
+
