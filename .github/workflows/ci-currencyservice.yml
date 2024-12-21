@@ -1,0 +1,60 @@
+name: Currencyservice CI 
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/currencyservice/**'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  security-events: write  
+env:
+  DOCKERHUB_ID: maestrops
+
+jobs:
+  Currencyservice-CI:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set environment variables
+        run: |
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+          echo "APP_NAME=currencyservice" >> $GITHUB_ENV
+          echo "IMAGE_NAME=${{ env.DOCKERHUB_ID }}/currencyservice" >> $GITHUB_ENV
+          echo "IMAGE_TAG_1=latest" >> $GITHUB_ENV
+          echo "IMAGE_TAG_2=${{ github.run_number }}-$COMMIT_SHA" >> $GITHUB_ENV
+
+      - name: Build Docker Image
+        working-directory: src/currencyservice
+        run: |
+          docker build -t ${{ env.IMAGE_NAME }} .
+          docker tag ${{ env.IMAGE_NAME }} ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_2 }}
+          # docker tag ${{ env.IMAGE_NAME }} ${{ env.DOCKERHUB_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_1 }}
+
+      - name: Run Trivy Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}
+          format: 'sarif'
+          output: '${{ env.APP_NAME }}.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: '${{ env.APP_NAME }}.sarif'
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ env.DOCKERHUB_ID }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push Docker Images
+        run: |
+          docker push ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_1 }}
+          docker push ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_2 }}
