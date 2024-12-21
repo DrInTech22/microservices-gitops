@@ -14,7 +14,7 @@ env:
   DOCKERHUB_ID: maestrops
 
 jobs:
-  Frontend CI:
+  Adservice-CI:
     runs-on: ubuntu-latest
     
     steps:
