@@ -1,10 +1,10 @@
-name: Adservice CI 
+name: Cartservice CI 
 
 on:
   push:
     branches: [ main ]
     paths:
-      - 'src/adservice/**'
+      - 'src/cartservice/**'
   workflow_dispatch:
 
 permissions:
@@ -14,7 +14,7 @@ env:
   DOCKERHUB_ID: maestrops
 
 jobs:
-  Adservice-CI:
+  Cartservice-CI:
     runs-on: ubuntu-latest
     
     steps:
@@ -24,13 +24,13 @@ jobs:
       - name: Set environment variables
         run: |
           COMMIT_SHA=$(git rev-parse --short HEAD)
-          echo "APP_NAME=adservice" >> $GITHUB_ENV
-          echo "IMAGE_NAME=${{ env.DOCKERHUB_ID }}/adservice" >> $GITHUB_ENV
+          echo "APP_NAME=cartservice" >> $GITHUB_ENV
+          echo "IMAGE_NAME=${{ env.DOCKERHUB_ID }}/cartservice" >> $GITHUB_ENV
           echo "IMAGE_TAG_1=latest" >> $GITHUB_ENV
           echo "IMAGE_TAG_2=${{ github.run_number }}-$COMMIT_SHA" >> $GITHUB_ENV
 
       - name: Build Docker Image
-        working-directory: src/adservice
+        working-directory: src/cartservice/src
         run: |
           docker build -t ${{ env.IMAGE_NAME }} .
           docker tag ${{ env.IMAGE_NAME }} ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_2 }}
