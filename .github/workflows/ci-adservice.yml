@@ -17,6 +17,9 @@ env:
 jobs:
   Adservice-CI:
     runs-on: ubuntu-latest
+
+    outputs:
+      image_tag: ${{ steps.set_env.outputs.image_tag }}
     
     steps:
       - name: Checkout code
