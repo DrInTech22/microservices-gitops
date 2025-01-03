@@ -1,10 +1,10 @@
 name: Adservice CI 
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'src/adservice/**'
+  # push:
+  #   branches: [ main ]
+  #   paths:
+  #     - 'src/adservice/**'
   workflow_dispatch:
 
 permissions:
