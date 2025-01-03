@@ -12,6 +12,7 @@ permissions:
   security-events: write  
 env:
   DOCKERHUB_ID: maestrops
+  MANIFEST_REPO: DrInTech22/k8s-microservices
 
 jobs:
   Adservice-CI:
