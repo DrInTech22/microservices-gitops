@@ -14,18 +14,19 @@ env:
   DOCKERHUB_ID: maestrops
   MANIFEST_REPO: DrInTech22/k8s-microservices
 
-jobs:
+jobs: 
   Adservice-CI:
     runs-on: ubuntu-latest
 
     outputs:
-      image_tag: ${{ steps.set_env.outputs.image_tag }}
-    
+      image_tag: ${{ steps.tag.outputs.IMAGE_TAG_2 }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set environment variables
+        id: tag
         run: |
           COMMIT_SHA=$(git rev-parse --short HEAD)
           echo "APP_NAME=adservice" >> $GITHUB_ENV
@@ -33,8 +34,7 @@ jobs:
           echo "IMAGE_TAG_1=latest" >> $GITHUB_ENV
           IMAGE_TAG_2="${{ github.run_number }}-$COMMIT_SHA"
           echo "IMAGE_TAG_2=${IMAGE_TAG_2}" >> $GITHUB_ENV
-        outputs:
-          image_tag: ${{ env.IMAGE_TAG_2 }}
+          echo "IMAGE_TAG_2=${IMAGE_TAG_2}" >> $GITHUB_OUTPUT
 
       - name: Build Docker Image
         working-directory: src/adservice
