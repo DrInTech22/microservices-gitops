@@ -8,7 +8,6 @@ on:
   workflow_dispatch:
 
 permissions:
-  # actions: read
   security-events: write  
 env:
   DOCKERHUB_ID: maestrops
@@ -40,7 +39,6 @@ jobs:
         run: |
           docker build -t ${{ env.IMAGE_NAME }} .
           docker tag ${{ env.IMAGE_NAME }} ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_2 }}
-          # docker tag ${{ env.IMAGE_NAME }} ${{ env.DOCKERHUB_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_1 }}
 
       - name: Run Trivy Scan
         uses: aquasecurity/trivy-action@master
