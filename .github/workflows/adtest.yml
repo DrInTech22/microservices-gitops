@@ -9,6 +9,8 @@ on:
 
 permissions:
   actions: read
+  contents: write
+  pull-requests: write
   security-events: write  
 
 env:
