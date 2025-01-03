@@ -27,7 +27,9 @@ jobs:
           echo "APP_NAME=cartservice" >> $GITHUB_ENV
           echo "IMAGE_NAME=${{ env.DOCKERHUB_ID }}/cartservice" >> $GITHUB_ENV
           echo "IMAGE_TAG_1=latest" >> $GITHUB_ENV
-          echo "IMAGE_TAG_2=${{ github.run_number }}-$COMMIT_SHA" >> $GITHUB_ENV
+          IMAGE_TAG_2="${{ github.run_number }}-$COMMIT_SHA"
+          echo "IMAGE_TAG_2=${IMAGE_TAG_2}" >> $GITHUB_ENV
+          echo "::set-output name=image_tag::${IMAGE_TAG_2}"
 
       - name: Build Docker Image
         working-directory: src/cartservice/src

@@ -74,8 +74,6 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      GIT_USER_NAME: DrInTech
-      GIT_USER_EMAIL: ${{ secrets.EMAIL }}
       APP_NAME: adservice
       IMAGE_TAG: ${{ needs.Adservice-CI.outputs.image_tag }}
       
@@ -90,14 +88,6 @@ jobs:
         run: |
           cd manifests
           sed -i "s|image:.*|image: ${{ env.DOCKERHUB_ID }}/${{ env.APP_NAME }}:${{ env.IMAGE_TAG }}|" ${{ env.APP_NAME }}.yml
-        #   git config --global user.email "${{env.GIT_USER_EMAIL }}"
-        #   git config --global user.name "${{env.GIT_USER_NAME }}"
-        #   git checkout -b release/${{ env.APP_NAME }}-update-${{ env.IMAGE_TAG }}
-        #   git add ${{ env.APP_NAME }}.yml
-        #   git commit -m "Update ${{ env.APP_NAME }} image to ${{ env.DOCKERHUB_ID }}/${{ env.APP_NAME }}:${{ env.IMAGE_TAG }}"
-        #   git push origin release/${{ env.APP_NAME }}-update-${{ env.IMAGE_TAG }}
-        # env:
-        #   GITHUB_TOKEN: ${{ secrets.TOKEN }}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
