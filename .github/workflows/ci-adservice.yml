@@ -8,7 +8,8 @@ on:
   workflow_dispatch:
 
 permissions:
-  security-events: write  
+  security-events: write
+  actions: read  
 env:
   DOCKERHUB_ID: maestrops
   MANIFEST_REPO: DrInTech22/k8s-microservices
