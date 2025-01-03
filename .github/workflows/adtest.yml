@@ -1,0 +1,110 @@
+name: Adservice CI 
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/adservice/**'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  security-events: write  
+
+env:
+  DOCKERHUB_ID: maestrops
+  MANIFEST_REPO: DrInTech22/k8s-microservices
+
+jobs:
+  Adservice-CI:
+    runs-on: ubuntu-latest
+
+    outputs:
+      image_tag: ${{ steps.set_env.outputs.image_tag }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set environment variables and image tag
+        id: set_env
+        run: |
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+          echo "APP_NAME=adservice" >> $GITHUB_ENV
+          echo "IMAGE_NAME=${{ env.DOCKERHUB_ID }}/adservice" >> $GITHUB_ENV
+          echo "IMAGE_TAG_1=latest" >> $GITHUB_ENV
+          IMAGE_TAG_2="${{ github.run_number }}-$COMMIT_SHA"
+          echo "IMAGE_TAG_2=${IMAGE_TAG_2}" >> $GITHUB_ENV
+          echo "::set-output name=image_tag::${IMAGE_TAG_2}"
+
+      - name: Build Docker Image
+        working-directory: src/adservice
+        run: |
+          docker build -t ${{ env.IMAGE_NAME }} .
+          docker tag ${{ env.IMAGE_NAME }} ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_2 }}
+          # docker tag ${{ env.IMAGE_NAME }} ${{ env.DOCKERHUB_ID }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_1 }}
+
+      - name: Run Trivy Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}
+          format: 'sarif'
+          output: '${{ env.APP_NAME }}.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: '${{ env.APP_NAME }}.sarif'
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ env.DOCKERHUB_ID }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push Docker Images
+        run: |
+          docker push ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_1 }}
+          docker push ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_2 }}
+
+  Update-Manifest-Repo:
+    needs: Adservice-CI
+    runs-on: ubuntu-latest
+
+    env:
+      GIT_USER_NAME: DrInTech
+      GIT_USER_EMAIL: ${{ secrets.EMAIL }}
+      APP_NAME: adservice
+      IMAGE_TAG: ${{ needs.Adservice-CI.outputs.image_tag }}
+      
+    steps:
+      - name: Checkout Manifest Repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.MANIFEST_REPO }}
+          token: ${{ secrets.TOKEN }}
+
+      - name: Update Manifest File
+        run: |
+          cd manifests
+          sed -i "s|image:.*|image: ${{ env.DOCKERHUB_ID }}/${{ env.APP_NAME }}:${{ env.IMAGE_TAG }}|" ${{ env.APP_NAME }}.yml
+          git config --global user.email "${{env.GIT_USER_EMAIL }}"
+          git config --global user.name "${{env.GIT_USER_NAME }}"
+          git checkout -b release/${{ env.APP_NAME }}-update-${{ env.IMAGE_TAG }}
+          git add ${{ env.APP_NAME }}.yml
+          git commit -m "Update ${{ env.APP_NAME }} image to ${{ env.DOCKERHUB_ID }}/${{ env.APP_NAME }}:${{ env.IMAGE_TAG }}"
+          git push origin release/${{ env.APP_NAME }}-update-${{ env.IMAGE_TAG }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.TOKEN }}
+          commit-message: "Update ${{ env.APP_NAME }} image to ${{ env.DOCKERHUB_ID }}/${{ env.APP_NAME }}:${{ env.IMAGE_TAG }}"
+          branch: release/${{ env.APP_NAME }}-update-${{ env.IMAGE_TAG }}
+          title: "Update ${{ env.APP_NAME }} image to ${{ env.DOCKERHUB_ID }}/${{ env.APP_NAME }}:${{ env.IMAGE_TAG }}"
+          body: |
+            This pull request updates the ${{ env.APP_NAME }} image tag to `${{ env.DOCKERHUB_ID }}/${{ env.APP_NAME }}:${{ env.IMAGE_TAG }}`.
+            Please review and merge to deploy the updated image to the cluster.
+          base: main
