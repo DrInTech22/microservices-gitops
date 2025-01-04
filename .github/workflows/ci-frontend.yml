@@ -9,6 +9,7 @@ on:
 
 permissions:
   security-events: write  
+
 env:
   DOCKERHUB_ID: maestrops
   MANIFEST_REPO: DrInTech22/k8s-microservices
@@ -18,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     
     outputs:
-      image_tag: ${{ steps.set_env.outputs.image_tag }}
+      image_tag: ${{ steps.tag.outputs.IMAGE_TAG_2 }}
 
     steps:
       - name: Checkout code
@@ -32,7 +33,7 @@ jobs:
           echo "IMAGE_TAG_1=latest" >> $GITHUB_ENV
           IMAGE_TAG_2="${{ github.run_number }}-$COMMIT_SHA"
           echo "IMAGE_TAG_2=${IMAGE_TAG_2}" >> $GITHUB_ENV
-          echo "::set-output name=image_tag::${IMAGE_TAG_2}"
+          echo "IMAGE_TAG_2=${IMAGE_TAG_2}" >> $GITHUB_OUTPUT
 
       - name: Build Docker Image
         working-directory: src/frontend

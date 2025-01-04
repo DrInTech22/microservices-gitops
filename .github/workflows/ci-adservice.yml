@@ -9,7 +9,7 @@ on:
 
 permissions:
   security-events: write
-  actions: read  
+
 env:
   DOCKERHUB_ID: maestrops
   MANIFEST_REPO: DrInTech22/k8s-microservices
