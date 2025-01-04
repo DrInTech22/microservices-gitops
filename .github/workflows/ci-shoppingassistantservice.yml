@@ -26,6 +26,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set environment variables
+        id: tag
         run: |
           COMMIT_SHA=$(git rev-parse --short HEAD)
           echo "APP_NAME=shoppingassistantservice" >> $GITHUB_ENV
